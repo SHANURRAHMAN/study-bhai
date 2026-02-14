@@ -1,65 +1,297 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getGameData, getDailyGoal } from "@/lib/game";
+import type { GameData } from "@/lib/game";
+import { auth } from "@/lib/firebase";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  User,
+} from "firebase/auth";
 
 export default function Home() {
+  const [notes, setNotes] = useState("");
+  const [difficulty, setDifficulty] = useState("medium");
+  const [loading, setLoading] = useState(false);
+  const [game, setGame] = useState<GameData | null>(null);
+
+  const [user, setUser] = useState<User | null>(null);
+
+  const router = useRouter();
+
+  // 🔥 Load game data + auth state
+  useEffect(() => {
+    setGame(getGameData());
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 🔐 Google Login
+const loginWithGoogle = async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+
+    if (result.user) {
+      localStorage.setItem(
+        "username",
+        result.user.displayName || "User"
+      );
+    }
+
+    window.location.reload();
+  } catch (error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "auth/popup-closed-by-user"
+  ) {
+    console.log("User closed login popup");
+    return;
+  }
+
+  console.error("Login error:", error);
+}
+
+};
+
+
+  // 🔐 Logout
+  const logout = async () => {
+    await signOut(auth);
+  };
+
+  // 🧠 Generate Quiz
+  const generateQuiz = async () => {
+    if (!notes) return;
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ noteContent: notes, difficulty }),
+      });
+
+      const data = await res.json();
+      if (data.error) {
+        alert("Quiz generation failed");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("currentQuiz", JSON.stringify(data));
+      router.push("/quiz");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    }
+
+    setLoading(false);
+  };
+
+  // 📚 Generate Flashcards
+  const generateFlashcards = async () => {
+    if (!notes) return;
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/generate-flashcards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ noteContent: notes }),
+      });
+
+      const data = await res.json();
+      if (data.error) {
+        alert("Flashcard generation failed");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("currentFlashcards", JSON.stringify(data));
+      router.push("/flashcards");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    }
+
+    setLoading(false);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-950 to-black text-white p-10">
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold tracking-wide">
+          🧠 Study Twin
+        </h1>
+
+        <div className="flex items-center gap-6 text-sm">
+
+          {game && (
+            <>
+              <div className="bg-white/10 px-4 py-2 rounded-xl backdrop-blur-md border border-white/10">
+                🌿 Level {game.level} • {game.xp} XP
+              </div>
+
+              <div className="bg-orange-500/20 px-4 py-2 rounded-xl border border-orange-400/30">
+                🔥 {game.streak} Day Streak
+              </div>
+            </>
+          )}
+
+          {user ? (
+            <div className="flex items-center gap-4">
+              <span className="text-gray-300">
+                👋 {user.displayName}
+              </span>
+              <button
+                onClick={logout}
+                className="bg-red-500/20 px-4 py-2 rounded-xl border border-red-400/30 hover:scale-105 transition"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={loginWithGoogle}
+              className="bg-white text-black px-4 py-2 rounded-xl font-semibold hover:scale-105 transition"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              Sign in with Google
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* LEVEL XP BAR */}
+      {game && (
+        <div className="mb-6">
+          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-500"
+              style={{
+                width: `${game.xp % 100}%`,
+              }}
+            />
+          </div>
+          <p className="text-xs text-gray-400 mt-2">
+            {100 - (game.xp % 100)} XP to next level
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      )}
+
+      {/* 🎯 DAILY GOAL */}
+      {game && (
+        <div className="mb-12">
+          <div className="flex justify-between text-sm mb-2">
+            <span>🎯 Daily Goal</span>
+            <span>{game.dailyXP}/{getDailyGoal()} XP</span>
+          </div>
+
+          <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-pink-500 to-orange-500 transition-all duration-500"
+              style={{
+                width: `${Math.min(
+                  (game.dailyXP / getDailyGoal()) * 100,
+                  100
+                )}%`,
+              }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          {game.dailyXP >= getDailyGoal() && (
+            <p className="text-green-400 text-sm mt-2 animate-pulse">
+              🎉 Daily Goal Completed!
+            </p>
+          )}
         </div>
-      </main>
-    </div>
+      )}
+
+      {/* 🌳 STUDY GARDEN */}
+      {game && (
+        <div className="mb-12 flex flex-col items-center">
+          <div className="text-7xl transition-all duration-500 hover:scale-110">
+            {game.level < 2 && "🌱"}
+            {game.level >= 2 && game.level < 4 && "🌿"}
+            {game.level >= 4 && game.level < 6 && "🌳"}
+            {game.level >= 6 && game.level < 10 && "🌲"}
+            {game.level >= 10 && "🌸"}
+          </div>
+          <p className="mt-3 text-sm text-gray-400">
+            Your Study Garden grows as you level up 🌿
+          </p>
+        </div>
+      )}
+
+      {/* NOTES */}
+      <textarea
+        className="w-full p-6 bg-white/5 border border-white/10 rounded-2xl mb-6 backdrop-blur-md focus:outline-none focus:border-purple-500 transition"
+        rows={6}
+        placeholder="Paste your notes here..."
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+      />
+
+      {/* ACTION BUTTONS */}
+      <div className="flex flex-wrap gap-4">
+        <select
+          className="border border-white/10 bg-white/5 p-3 rounded-xl backdrop-blur-md"
+          value={difficulty}
+          onChange={(e) => setDifficulty(e.target.value)}
+        >
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+
+        <button
+          onClick={generateQuiz}
+          className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all"
+        >
+          {loading ? "Generating..." : "Generate Quiz"}
+        </button>
+
+        <button
+          onClick={generateFlashcards}
+          className="bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all"
+        >
+          {loading ? "Generating..." : "Generate Flashcards"}
+        </button>
+
+        <button
+          onClick={() => router.push("/study")}
+          className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all"
+        >
+          Start Study Timer
+        </button>
+
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="bg-gradient-to-r from-yellow-500 to-orange-600 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all"
+        >
+          View Analytics
+        </button>
+
+        <button
+          onClick={() => router.push("/leaderboard")}
+          className="bg-yellow-500 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-all"
+        >
+          🌎 View Leaderboard
+        </button>
+      </div>
+
+    </main>
   );
 }
