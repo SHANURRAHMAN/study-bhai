@@ -1,3 +1,6 @@
+import FeatureCard from "@/components/FeatureCard";
+
+
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
@@ -61,100 +64,88 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section
-        id="features"
-className="max-w-6xl mx-auto px-8 pb-16 pt-10 grid md:grid-cols-3 gap-10"
+     {/* FEATURES */}
+<section
+  id="features"
+  className="max-w-6xl mx-auto px-8 pb-24 grid md:grid-cols-4 gap-8"
+>
+  <FeatureCard
+    title="🧠 AI Quiz Engine"
+    description="Turn notes into exam-ready quizzes instantly with AI."
+  />
 
-      >
-        <div className="bg-white/[0.03] p-8 rounded-2xl border border-white/10">
-          <h3 className="text-lg font-semibold mb-4">🧠 AI Quiz Engine</h3>
-          <p className="text-gray-400 text-sm">
-            Instantly generate smart quizzes from your notes.
-          </p>
-        </div>
+  <FeatureCard
+    title="🔥 Smart XP System"
+    description="Level up, build streaks, and gamify your learning."
+  />
 
-        <div className="bg-white/[0.03] p-8 rounded-2xl border border-white/10">
-          <h3 className="text-lg font-semibold mb-4">🔥 XP & Streaks</h3>
-          <p className="text-gray-400 text-sm">
-            Earn XP, maintain streaks, and gamify your study routine.
-          </p>
-        </div>
+  <FeatureCard
+    title="📊 Deep Analytics"
+    description="Track focus time, progress trends, and growth insights."
+  />
 
-        <div className="bg-white/[0.03] p-8 rounded-2xl border border-white/10">
-          <h3 className="text-lg font-semibold mb-4">📊 Deep Analytics</h3>
-          <p className="text-gray-400 text-sm">
-            Track performance, focus time, and improvement trends.
-          </p>
-        </div>
-      </section>
+  <FeatureCard
+    title="🔎 AI Resource Finder"
+    description="Discover the best free, paid, YouTube and practice resources for any topic."
+  />
+</section>
+
 
     
 
-      {/* ABOUT SECTION */}
-<section
-  id="about"
-  className="scroll-mt-32 max-w-6xl mx-auto px-10 pt-16 pb-24"
->
-  <div className="grid md:grid-cols-2 gap-16 items-center">
+      <section className="max-w-6xl mx-auto px-8 py-24 grid md:grid-cols-2 gap-16 items-center">
 
-    {/* LEFT TEXT */}
-    <div>
-      <p className="text-purple-400 uppercase tracking-widest text-sm mb-4">
-        About Study Bhai
-      </p>
+  <div>
+    <p className="text-purple-400 tracking-wider uppercase mb-4">
+      About Study Bhai
+    </p>
 
-      <h2 className="text-4xl font-bold mb-6 leading-tight">
-        Built for students who want
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-          {" "}real growth.
-        </span>
-      </h2>
+    <h2 className="text-4xl font-bold mb-6 leading-tight">
+      Your complete AI-powered study ecosystem.
+    </h2>
 
-      <p className="text-gray-400 mb-6 leading-relaxed">
-        Study Bhai is a gamified AI-powered learning platform designed to
-        help students stay consistent, focused, and motivated.
-        We combine artificial intelligence, habit tracking, XP rewards,
-        streak systems, and performance analytics — all in one powerful
-        dashboard.
-      </p>
+    <p className="text-gray-400 mb-6 leading-relaxed">
+      Study Bhai is more than a quiz generator. 
+      It’s an AI-powered learning platform designed to help students 
+      study smarter, stay consistent, and grow faster.
+    </p>
 
-      <p className="text-gray-400 leading-relaxed">
-        Instead of studying randomly, you study with structure.
-        Instead of losing motivation, you level up.
-      </p>
-    </div>
-
-    {/* RIGHT VISUAL CARD */}
-    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-[0_0_60px_rgba(168,85,247,0.15)]">
-      <div className="space-y-6">
-
-        <div>
-          <p className="text-sm text-gray-400">Mission</p>
-          <p className="text-lg font-semibold">
-            Make studying addictive — in a good way.
-          </p>
-        </div>
-
-        <div>
-          <p className="text-sm text-gray-400">Vision</p>
-          <p className="text-lg font-semibold">
-            Become the AI study companion for every student.
-          </p>
-        </div>
-
-        <div>
-          <p className="text-sm text-gray-400">Core Idea</p>
-          <p className="text-lg font-semibold">
-            Study. Earn XP. Stay consistent. Win.
-          </p>
-        </div>
-
-      </div>
-    </div>
-
+    <p className="text-gray-400 leading-relaxed">
+      Generate quizzes, build flashcards, track XP and streaks,
+      analyze performance, and discover the best learning resources —
+      all in one powerful dashboard.
+    </p>
   </div>
+
+  <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 p-8 rounded-3xl">
+    <div className="space-y-6">
+
+      <div>
+        <p className="text-gray-400 text-sm">Mission</p>
+        <p className="font-semibold text-lg">
+          Make studying addictive — in a good way.
+        </p>
+      </div>
+
+      <div>
+        <p className="text-gray-400 text-sm">Vision</p>
+        <p className="font-semibold text-lg">
+          Become the AI study companion for every student.
+        </p>
+      </div>
+
+      <div>
+        <p className="text-gray-400 text-sm">Core Idea</p>
+        <p className="font-semibold text-lg">
+          Study. Earn XP. Discover resources. Win.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
 </section>
+
 
   {/* FOOTER */}
       <footer className="text-center py-10 border-t border-white/10 text-gray-500 text-sm">
